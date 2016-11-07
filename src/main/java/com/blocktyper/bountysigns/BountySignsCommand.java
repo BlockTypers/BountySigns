@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -109,11 +111,32 @@ public class BountySignsCommand implements CommandExecutor {
 			return;
 
 		}
+		
+		
 
 		plugin.updateBountySignRepo();
 		player.sendMessage(ChatColor.GREEN + "Bounty sign removed. ID: " + id);
 
 		plugin.removeIdFromDimentionItemCount(bountySign.getId());
+		
+		Block block = player.getWorld().getBlockAt(bountySign.getX(), bountySign.getY(), bountySign.getZ());
+		
+		if(block != null){
+			try {
+				Sign sign = (Sign)block.getState();
+				if(sign != null){
+					sign.setLine(0,"");
+					sign.setLine(1,"");
+					sign.setLine(2,"");
+					sign.update();
+					player.sendMessage(ChatColor.GREEN + "Sign cleared location: ("+bountySign.getX()+","+bountySign.getY()+","+bountySign.getZ()+")" );
+				}
+			} catch (IndexOutOfBoundsException e) {
+				player.sendMessage(ChatColor.YELLOW + "Sign not found at location: ("+bountySign.getX()+","+bountySign.getY()+","+bountySign.getZ()+")" );
+			}
+		}else{
+			player.sendMessage(ChatColor.YELLOW + "No block found at sign location: ("+bountySign.getX()+","+bountySign.getY()+","+bountySign.getZ()+")" );
+		}
 
 	}
 
