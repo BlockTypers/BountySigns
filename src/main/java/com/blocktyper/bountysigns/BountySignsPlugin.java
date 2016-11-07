@@ -194,7 +194,7 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 			dimentionItemCount = getTypeData(DATA_KEY_BOUNTY_SIGN_DIMENTION_MAP, DimentionItemCount.class);
 			if (dimentionItemCount == null || dimentionItemCount.getItemsInDimentionAtValue() == null) {
 				dimentionItemCount = new DimentionItemCount();
-				dimentionItemCount.setItemsInDimentionAtValue(new HashMap<String, Map<Integer, Set<String>>>());
+				dimentionItemCount.setItemsInDimentionAtValue(new HashMap<String, Map<String,Map<Integer, Set<String>>>>());
 				updateDimentionItemCount();
 			}
 		}
@@ -219,17 +219,20 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 			initDimentionItemCount();
 
 			for (String dimention : getDimentionList()) {
-				if (dimentionItemCount.getItemsInDimentionAtValue().get(dimention) == null) {
-					dimentionItemCount.getItemsInDimentionAtValue().put(dimention, new HashMap<Integer, Set<String>>());
+				if (dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()) == null) {
+					dimentionItemCount.getItemsInDimentionAtValue().put(bountySign.getWorld(), new HashMap<String, Map<Integer, Set<String>>>());
+				}
+				if (dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention) == null) {
+					dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).put(dimention, new HashMap<Integer, Set<String>>());
 				}
 
 				int value = dimention.equals("x") ? bountySign.getX()
 						: (dimention.equals("y") ? bountySign.getY() : bountySign.getZ());
 
-				if (dimentionItemCount.getItemsInDimentionAtValue().get(dimention).get(value) == null) {
-					dimentionItemCount.getItemsInDimentionAtValue().get(dimention).put(value, new HashSet<String>());
+				if (dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention).get(value) == null) {
+					dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention).put(value, new HashSet<String>());
 				}
-				dimentionItemCount.getItemsInDimentionAtValue().get(dimention).get(value).add(bountySign.getId());
+				dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention).get(value).add(bountySign.getId());
 			}
 			bountySignRepo.getMap().put(bountySign.getId(), bountySign);
 			updateDimentionItemCount();

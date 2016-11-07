@@ -152,7 +152,7 @@ public class BountySignInteractListener extends AbstractListener{
 		}
 
 		List<String> exactMatches = plugin.getClickedBlockHelper()
-				.getMatchesInDimentionItemCount(bountySignsPlugin.getDimentionItemCount(), sign.getX(), sign.getY(), sign.getZ());
+				.getMatchesInDimentionItemCount(bountySignsPlugin.getDimentionItemCount(), sign.getWorld().getName(), sign.getX(), sign.getY(), sign.getZ());
 
 		if (exactMatches == null || exactMatches.isEmpty()) {
 			plugin.debugWarning("No match was found but we made it all the way through processing");
