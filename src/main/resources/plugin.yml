@@ -7,4 +7,6 @@ database: false
 description: Find the NPC on the sign.  Get the bounty.
 commands:
   bounty-signs:
-    description: Not sure what this does yet
+    description: main entry point.  run with no args for usage
+  bnty: 
+    description: short cut for /bounty-signs
