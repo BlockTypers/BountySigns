@@ -1,0 +1,10 @@
+name: BountySigns
+version: 1.0.0
+main:  com.blocktyper.bountysigns.BountySignsPlugin
+author: spaarkimus
+website: blocktyper.com
+database: false
+description: Find the NPC on the sign.  Get the bounty.
+commands:
+  bounty-signs:
+    description: Not sure what this does yet

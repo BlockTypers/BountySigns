@@ -1,2 +1,2 @@
-# BountySigns
-A spigot plugin for putting a bounty on NPCs in minecraft.
+# MagicDoors
+Bukkit/Spigot plugin for creating bounty signs
