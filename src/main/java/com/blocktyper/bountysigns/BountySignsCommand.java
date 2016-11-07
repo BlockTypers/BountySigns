@@ -1,6 +1,8 @@
 package com.blocktyper.bountysigns;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -109,7 +111,7 @@ public class BountySignsCommand implements CommandExecutor {
 		}
 
 		plugin.updateBountySignRepo();
-		player.sendMessage("Bounty sign removed.");
+		player.sendMessage(ChatColor.GREEN + "Bounty sign removed. ID: " + id);
 
 		plugin.removeIdFromDimentionItemCount(bountySign.getId());
 
@@ -129,22 +131,40 @@ public class BountySignsCommand implements CommandExecutor {
 		}
 
 		int signsRemoved = 0;
+
+		List<String> idsToRemove = new ArrayList<String>();
 		for (String id : allSignsMap.keySet()) {
 			BountySign bountySign = allSignsMap.get(id);
 
+			if (bountySign == null) {
+				plugin.debugInfo("bounty was null.  Can't remove: " + id);
+				continue;
+			}
+
 			if (bountySign.getTarget().equals(args[1])) {
-				endBountyById(player, bountySign.getId());
+				idsToRemove.add(id);
+			}
+		}
+
+		if (!idsToRemove.isEmpty()) {
+			for (String id : idsToRemove) {
+				plugin.debugInfo("removing bounty : " + id);
+				endBountyById(player, id);
 				signsRemoved++;
+				plugin.debugInfo("Skipping bounty: " + id);
 			}
 		}
 
 		if (signsRemoved == 0) {
 			player.sendMessage(ChatColor.RED + "There are no signs for that target to remove.");
+		} else {
+			player.sendMessage(ChatColor.RED + (signsRemoved + "Bounties ended for target'" + args[1] + "'."));
 		}
 
 	}
 
 	private void endAllBounties(Player player) {
+
 		Map<String, BountySign> allSignsMap = plugin.getBountySignRepo().getMap();
 
 		if (allSignsMap == null || allSignsMap.isEmpty()) {
@@ -152,9 +172,33 @@ public class BountySignsCommand implements CommandExecutor {
 			return;
 		}
 
+		int signsRemoved = 0;
+
+		List<String> idsToRemove = new ArrayList<String>();
 		for (String id : allSignsMap.keySet()) {
 			BountySign bountySign = allSignsMap.get(id);
-			endBountyById(player, bountySign.getId());
+
+			if (bountySign == null) {
+				plugin.debugInfo("bounty was null.  Can't remove: " + id);
+				continue;
+			}
+
+			idsToRemove.add(id);
+		}
+
+		if (!idsToRemove.isEmpty()) {
+			for (String id : idsToRemove) {
+				plugin.debugInfo("removing bounty : " + id);
+				endBountyById(player, id);
+				signsRemoved++;
+				plugin.debugInfo("Skipping bounty: " + id);
+			}
+		}
+
+		if (signsRemoved == 0) {
+			player.sendMessage(ChatColor.RED + "There are no signs to remove.");
+		} else {
+			player.sendMessage(ChatColor.RED + (signsRemoved + "Bounties ended."));
 		}
 	}
 
