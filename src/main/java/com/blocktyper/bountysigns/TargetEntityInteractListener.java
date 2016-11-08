@@ -94,7 +94,7 @@ public class TargetEntityInteractListener extends AbstractListener {
 				}
 
 				plugin.debugInfo("REWARD DROPPED: " + reward.getType().name());
-				player.sendMessage(ChatColor.GREEN + "Reward: " + bountySignsPlugin.getRewardDescription(reward));
+				player.sendMessage(ChatColor.GREEN + "Reward: " + ChatColor.GOLD + bountySignsPlugin.getRewardDescription(reward));
 				player.getWorld().dropItem(player.getLocation(), reward);
 				bountiesCollected++;
 				acceptedBounty.setCompletedDate(new Date());

@@ -95,10 +95,10 @@ public class BountySignInteractListener extends AbstractListener{
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(existingAcceptedBounty.getAcceptedDate());
 					cal.add(Calendar.DAY_OF_YEAR, 1);
-					SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+					SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 					player.sendMessage(
-							ChatColor.YELLOW + "You have colected this bounty and can not repeat for another 24 hours ["
-									+ format1.format(cal.getTime()) + "].");
+							(ChatColor.YELLOW + "You have colected this bounty and can not repeat until ") + (ChatColor.RED + "["
+									+ format1.format(cal.getTime()) + "]."));
 					return;
 				}
 			}
@@ -113,17 +113,17 @@ public class BountySignInteractListener extends AbstractListener{
 		bountySignsPlugin.addAcceptedBounty(acceptedBounty);
 
 		ItemStack reward = bountySign.getReward().unbox();
-		player.sendMessage(ChatColor.GREEN + "Mission accepted. Find '" + bountySign.getTarget() + "'.");
+		player.sendMessage((ChatColor.GREEN + "Mission accepted. Find '") + (ChatColor.RED + bountySign.getTarget()) + ChatColor.GREEN + "'.");
 
 		if (bountySign.getReward() != null) {
 			player.sendMessage(
-					ChatColor.GREEN + "You will be rewarded: " + bountySignsPlugin.getRewardDescription(bountySign.getReward().unbox()));
+					ChatColor.YELLOW + "You will be rewarded: " + (ChatColor.GREEN + bountySignsPlugin.getRewardDescription(bountySign.getReward().unbox())));
 
 			if (reward.getItemMeta() != null && reward.getItemMeta().getEnchants() != null
 					&& !reward.getItemMeta().getEnchants().isEmpty()) {
 				player.sendMessage(ChatColor.GREEN + " Enchanments: ");
 				for (Enchantment enchantment : reward.getItemMeta().getEnchants().keySet()) {
-					player.sendMessage(ChatColor.GREEN + "  -" + enchantment.getName() + "["
+					player.sendMessage(ChatColor.GOLD + "  -" + enchantment.getName() + "["
 							+ reward.getItemMeta().getEnchants().get(enchantment) + "]");
 				}
 			}
@@ -132,7 +132,7 @@ public class BountySignInteractListener extends AbstractListener{
 					&& !reward.getItemMeta().getLore().isEmpty()) {
 				player.sendMessage(ChatColor.GREEN + " Lore: ");
 				for (String lore : reward.getItemMeta().getLore()) {
-					player.sendMessage(ChatColor.GREEN + "  -" + lore);
+					player.sendMessage(ChatColor.BLUE + "  -" + lore);
 				}
 			}
 		}
@@ -161,7 +161,7 @@ public class BountySignInteractListener extends AbstractListener{
 
 		int index = 0;
 		if (exactMatches.size() > 1) {
-			plugin.info("There was more than one match found after processing");
+			plugin.debugInfo("There was more than one match found after processing.");
 			index = random.nextInt(exactMatches.size());
 		}
 
@@ -192,8 +192,8 @@ public class BountySignInteractListener extends AbstractListener{
 		ItemStack reward = bountySignsPlugin.getPlayerLastBountyRewardCreatedMap().get(player.getName());
 		String targetName = bountySignsPlugin.getPlayerLastBountyTargetCreatedMap().get(player.getName());
 
-		sign.setLine(0, "Wanted");
-		sign.setLine(1, targetName);
+		sign.setLine(0, ChatColor.RED + "Wanted");
+		sign.setLine(1, ChatColor.RED + targetName);
 		sign.setLine(2, ChatColor.DARK_GREEN + "Reward");
 		if (sign.update()) {
 			BountySign bountySign = new BountySign();
@@ -207,9 +207,8 @@ public class BountySignInteractListener extends AbstractListener{
 			bountySign.setWorld(sign.getWorld().getName());
 			bountySign.setId(id == null ? UUID.randomUUID().toString() : id);
 			bountySignsPlugin.addBountySign(bountySign);
-			player.sendMessage(ChatColor.GREEN + "Bounty sign created. [" + bountySign.getId() + "]");
+			player.sendMessage(ChatColor.GREEN + "Bounty sign created. [" + (ChatColor.YELLOW + bountySign.getId()) + ChatColor.GREEN + "]");
 			bountySignsPlugin.getPlayerLastBountyRewardCreatedMap().put(player.getName(), null);
-			player.sendMessage(ChatColor.YELLOW + "Reward cleared");
 		} else {
 			player.sendMessage(ChatColor.RED + "Unknown issue creating bounty sign created");
 		}

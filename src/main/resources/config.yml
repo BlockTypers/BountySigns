@@ -6,5 +6,5 @@
 
 ############## DEBUG ##########################
 locale: en
-debug: true
+debug: false
 log.recipes.enable: false
