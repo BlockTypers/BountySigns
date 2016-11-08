@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -86,6 +85,11 @@ public class BountySignsCommand implements CommandExecutor {
 			}
 
 			Player player = (Player) sender;
+			
+			if (!plugin.getPlayerHelper().playerCanDoAction(player, BountySignsPlugin.PERMISSIONS)) {
+				player.sendMessage(ChatColor.RED + "You do not have persmission to execute this command");
+				return false;
+			}
 
 			if (args != null && args.length > 0 && args[0] != null) {
 
@@ -191,21 +195,25 @@ public class BountySignsCommand implements CommandExecutor {
 						sign.setLine(1, "");
 						sign.setLine(2, "");
 						sign.update();
-						player.sendMessage(ChatColor.DARK_PURPLE + "Sign cleared at location: [" + ChatColor.YELLOW + bountySign.getWorld() + ChatColor.DARK_PURPLE
-								+ "](" + ChatColor.GOLD + bountySign.getX() + "," + bountySign.getY() + "," + bountySign.getZ() + ChatColor.DARK_PURPLE + ")");
+						player.sendMessage(ChatColor.DARK_PURPLE + "Sign cleared at location: [" + ChatColor.YELLOW
+								+ bountySign.getWorld() + ChatColor.DARK_PURPLE + "](" + ChatColor.GOLD
+								+ bountySign.getX() + "," + bountySign.getY() + "," + bountySign.getZ()
+								+ ChatColor.DARK_PURPLE + ")");
 					}
 				} catch (IndexOutOfBoundsException e) {
-					player.sendMessage(ChatColor.RED + "Sign not found at location: [" + ChatColor.YELLOW + bountySign.getWorld() + ChatColor.RED + "]("
-							+ ChatColor.GOLD + bountySign.getX() + "," + bountySign.getY() + "," + bountySign.getZ() + ChatColor.RED + ")");
+					player.sendMessage(ChatColor.RED + "Sign not found at location: [" + ChatColor.YELLOW
+							+ bountySign.getWorld() + ChatColor.RED + "](" + ChatColor.GOLD + bountySign.getX() + ","
+							+ bountySign.getY() + "," + bountySign.getZ() + ChatColor.RED + ")");
 				}
 			} else {
-				player.sendMessage(ChatColor.RED + "No block found at sign location: [" + ChatColor.YELLOW + bountySign.getWorld() + ChatColor.RED
-						+ "](" + ChatColor.GOLD + bountySign.getX() + "," + bountySign.getY() + "," + bountySign.getZ() + ChatColor.RED + ")");
+				player.sendMessage(ChatColor.RED + "No block found at sign location: [" + ChatColor.YELLOW
+						+ bountySign.getWorld() + ChatColor.RED + "](" + ChatColor.GOLD + bountySign.getX() + ","
+						+ bountySign.getY() + "," + bountySign.getZ() + ChatColor.RED + ")");
 			}
 		} else {
-			player.sendMessage(ChatColor.RED + "Could not find world '" + ChatColor.YELLOW + bountySign.getWorld() + ChatColor.RED
-					+ "' to remove sign at location: (" + ChatColor.GOLD + bountySign.getX() + "," + bountySign.getY() + ","
-					+ bountySign.getZ() + ChatColor.RED + ")");
+			player.sendMessage(ChatColor.RED + "Could not find world '" + ChatColor.YELLOW + bountySign.getWorld()
+					+ ChatColor.RED + "' to remove sign at location: (" + ChatColor.GOLD + bountySign.getX() + ","
+					+ bountySign.getY() + "," + bountySign.getZ() + ChatColor.RED + ")");
 		}
 
 	}
@@ -251,7 +259,8 @@ public class BountySignsCommand implements CommandExecutor {
 		if (signsRemoved == 0) {
 			player.sendMessage(ChatColor.RED + "There are no signs for that target to remove.");
 		} else {
-			player.sendMessage(ChatColor.YELLOW + ((signsRemoved+"") +  ChatColor.RED + " bounties cleared for target '" + args[1] + "'."));
+			player.sendMessage(ChatColor.YELLOW
+					+ ((signsRemoved + "") + ChatColor.RED + " bounties cleared for target '" + args[1] + "'."));
 		}
 
 	}
@@ -339,13 +348,6 @@ public class BountySignsCommand implements CommandExecutor {
 	}
 
 	private void setBountyCreationTarget(Player player, String[] args) {
-
-		if (!plugin.getPlayerHelper().playerCanDoAction(player, BountySignsPlugin.PERMISSIONS)) {
-			String message = "You do not have persmission to execute this command";// plugin.getLocalizedMessage("bountysigns.player.cant.do.action");
-			player.sendMessage(ChatColor.RED + new MessageFormat(message)
-					.format(new Object[] { StringUtils.join(BountySignsPlugin.PERMISSIONS, ",") }));
-			return;
-		}
 
 		String targetName = null;
 
