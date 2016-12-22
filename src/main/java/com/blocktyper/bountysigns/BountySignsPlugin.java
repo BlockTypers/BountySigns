@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -25,6 +26,7 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 	public static final String DATA_KEY_ACCEPTED_BOUNTIES = "accepted-bounties";
 	public static final String DATA_KEY_BOUNTY_SIGN_DIMENTION_MAP = "bounty-sign-dimiention-item-count";
 
+	private boolean killTarget = false;
 	private Map<String, String> playerLastBountyTargetCreatedMap = new HashMap<String, String>();
 	private Map<String, ItemStack> playerLastBountyRewardCreatedMap = new HashMap<String, ItemStack>();
 
@@ -88,6 +90,16 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 	public void setDimentionItemCount(DimentionItemCount dimentionItemCount) {
 		this.dimentionItemCount = dimentionItemCount;
 	}
+	
+	
+
+	public boolean isKillTarget() {
+		return killTarget;
+	}
+
+	public void setKillTarget(boolean killTarget) {
+		this.killTarget = killTarget;
+	}
 
 	public void removeIdFromDimentionItemCount(String idToRemove) {
 
@@ -137,22 +149,10 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 
 	public AcceptedBounty getAcceptedBounty(List<AcceptedBounty> acceptedBounties, String playerName,
 			String bountySignId) {
-		initAcceptedBountyRepo();
-
-		if (acceptedBounties == null) {
-			acceptedBounties = new ArrayList<AcceptedBounty>();
-		}
-
-		for (AcceptedBounty existing : acceptedBounties) {
-			if (!existing.getPlayer().equals(playerName))
-				continue;
-			if (!existing.getBountySignId().equals(bountySignId))
-				continue;
-
-			return existing;
-		}
-
-		return null;
+		Optional<AcceptedBounty> first = acceptedBounties != null ? acceptedBounties.parallelStream()
+				.filter(existing -> !existing.getPlayer().equals(playerName) && !existing.getBountySignId().equals(bountySignId))
+				.findFirst() : null;
+		return first != null && first.isPresent() ? first.get() : null;
 	}
 
 	public boolean addAcceptedBounty(AcceptedBounty acceptedBounty) {
@@ -214,26 +214,11 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 
 	public boolean addBountySign(BountySign bountySign) {
 		try {
-
 			initBountySignRepo();
 			initDimentionItemCount();
-
-			for (String dimention : getDimentionList()) {
-				if (dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()) == null) {
-					dimentionItemCount.getItemsInDimentionAtValue().put(bountySign.getWorld(), new HashMap<String, Map<Integer, Set<String>>>());
-				}
-				if (dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention) == null) {
-					dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).put(dimention, new HashMap<Integer, Set<String>>());
-				}
-
-				int value = dimention.equals("x") ? bountySign.getX()
-						: (dimention.equals("y") ? bountySign.getY() : bountySign.getZ());
-
-				if (dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention).get(value) == null) {
-					dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention).put(value, new HashSet<String>());
-				}
-				dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention).get(value).add(bountySign.getId());
-			}
+			
+			getDimentionList().stream().sequential().forEach(dimention -> addBountySignToDimention(bountySign, dimention));
+			
 			bountySignRepo.getMap().put(bountySign.getId(), bountySign);
 			updateDimentionItemCount();
 			updateBountySignRepo();
@@ -243,6 +228,23 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 		}
 
 		return true;
+	}
+	
+	private void addBountySignToDimention(BountySign bountySign, String dimention){
+		if (dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()) == null) {
+			dimentionItemCount.getItemsInDimentionAtValue().put(bountySign.getWorld(), new HashMap<String, Map<Integer, Set<String>>>());
+		}
+		if (dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention) == null) {
+			dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).put(dimention, new HashMap<Integer, Set<String>>());
+		}
+
+		int value = dimention.equals("x") ? bountySign.getX()
+				: (dimention.equals("y") ? bountySign.getY() : bountySign.getZ());
+
+		if (dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention).get(value) == null) {
+			dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention).put(value, new HashSet<String>());
+		}
+		dimentionItemCount.getItemsInDimentionAtValue().get(bountySign.getWorld()).get(dimention).get(value).add(bountySign.getId());
 	}
 
 	public String getRewardDescription(ItemStack itemStack) {

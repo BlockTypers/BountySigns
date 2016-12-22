@@ -8,6 +8,7 @@ public class BountySign {
 	private int z;
 	private CardboardBox reward;
 	private String target;
+	private boolean killTarget = false;
 
 	public String getId() {
 		return id;
@@ -66,5 +67,15 @@ public class BountySign {
 	public void setTarget(String target) {
 		this.target = target;
 	}
+
+	public boolean isKillTarget() {
+		return killTarget;
+	}
+
+	public void setKillTarget(boolean killTarget) {
+		this.killTarget = killTarget;
+	}
+	
+	
 
 }

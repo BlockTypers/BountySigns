@@ -1,11 +1,11 @@
 package com.blocktyper.bountysigns;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -26,6 +26,7 @@ public class BountySignsCommand implements CommandExecutor {
 	private static String COMMAND_BOUNTY_SIGNS_SHORT = "bnty";
 
 	private static final String ARG_BOUNTY_SIGN_TARGET = "target";
+	private static final String ARG_BOUNTY_SIGN_KILL_TARGET = "kill-target";
 	private static final String ARG_BOUNTY_SIGN_REWARD = "reward";
 	private static final String ARG_BOUNTY_SIGN_RESET = "reset";
 	private static final String ARG_BOUNTY_SIGN_END_ID = "clear-id";
@@ -38,6 +39,8 @@ public class BountySignsCommand implements CommandExecutor {
 		Map<String, String> commandArgMap = new HashMap<String, String>();
 		commandArgMap.put(ARG_BOUNTY_SIGN_TARGET,
 				"Run while looking at an NPC to set the current bounty target.  Alternately, use a 3rd argument of NPC's name instead of looking at an NPC.");
+		commandArgMap.put(ARG_BOUNTY_SIGN_KILL_TARGET,
+				"Run while looking at an NPC to set the current bounty kill target.  Alternately, use a 3rd argument of NPC's name instead of looking at an NPC.");
 		commandArgMap.put(ARG_BOUNTY_SIGN_REWARD,
 				"Run while holding an item to set the current bounty reward. Add an amount argument to ignore the stack size of in your hand.");
 		commandArgMap.put(ARG_BOUNTY_SIGN_RESET,
@@ -54,6 +57,7 @@ public class BountySignsCommand implements CommandExecutor {
 	static {
 		Map<String, String> commandArgMap = new HashMap<String, String>();
 		commandArgMap.put(ARG_BOUNTY_SIGN_TARGET, "[\"/{0} {1}\", \"/{0} {1} Notch\"]");
+		commandArgMap.put(ARG_BOUNTY_SIGN_KILL_TARGET, "[\"/{0} {1}\", \"/{0} {1} Notch\"]");
 		commandArgMap.put(ARG_BOUNTY_SIGN_REWARD, "[\"/{0} {1}\", \"/{0} {1} 3\"]");
 		commandArgMap.put(ARG_BOUNTY_SIGN_RESET, "[\"/{0} {1}\"]");
 		commandArgMap.put(ARG_BOUNTY_SIGN_END_ID, "[\"/{0} {1} 991d8d91-b7d2-4c56-8ebd-41059c5b43eb\"]");
@@ -85,7 +89,7 @@ public class BountySignsCommand implements CommandExecutor {
 			}
 
 			Player player = (Player) sender;
-			
+
 			if (!plugin.getPlayerHelper().playerCanDoAction(player, BountySignsPlugin.PERMISSIONS)) {
 				player.sendMessage(ChatColor.RED + "You do not have persmission to execute this command");
 				return false;
@@ -95,8 +99,8 @@ public class BountySignsCommand implements CommandExecutor {
 
 				String firstArg = args[0];
 
-				if (firstArg.equals(ARG_BOUNTY_SIGN_TARGET)) {
-					setBountyCreationTarget(player, args);
+				if (firstArg.equals(ARG_BOUNTY_SIGN_TARGET) || firstArg.equals(ARG_BOUNTY_SIGN_KILL_TARGET)) {
+					setBountyCreationTarget(player, args, firstArg.equals(ARG_BOUNTY_SIGN_KILL_TARGET));
 					return true;
 				} else if (firstArg.equals(ARG_BOUNTY_SIGN_RESET)) {
 					plugin.getPlayerLastBountyTargetCreatedMap().put(player.getName(), null);
@@ -137,23 +141,21 @@ public class BountySignsCommand implements CommandExecutor {
 	private void listAllBounties(Player player, String target) {
 		Map<String, BountySign> allSignsMap = plugin.getBountySignRepo().getMap();
 
-		int bountySignsFound = 0;
+		List<BountySign> bountySigns = null;
 		if (allSignsMap != null) {
-			for (String id : allSignsMap.keySet()) {
-				BountySign bountySign = allSignsMap.get(id);
 
-				if (target != null && !target.equals(bountySign.getTarget()))
-					continue;
+			bountySigns = allSignsMap.values().parallelStream().filter(
+					bountySign -> bountySign != null && (target == null || target.equals(bountySign.getTarget())))
+					.collect(Collectors.toList());
 
-				bountySignsFound++;
-				player.sendMessage((ChatColor.DARK_PURPLE + bountySign.getTarget()) + (ChatColor.WHITE + " - ")
-						+ (ChatColor.YELLOW + bountySign.getId()) + (ChatColor.WHITE + " - ")
-						+ (ChatColor.GREEN + plugin.getRewardDescription(bountySign.getReward().unbox()))
-						+ (ChatColor.WHITE + " - ") + (ChatColor.GOLD + "{" + bountySign.getX() + ","
-								+ bountySign.getY() + "," + bountySign.getZ() + "}"));
-			}
+			bountySigns.forEach(bountySign -> player.sendMessage((ChatColor.DARK_PURPLE + bountySign.getTarget())
+					+ (ChatColor.WHITE + " - ") + (ChatColor.YELLOW + bountySign.getId()) + (ChatColor.WHITE + " - ")
+					+ (ChatColor.GREEN + plugin.getRewardDescription(bountySign.getReward().unbox()))
+					+ (ChatColor.WHITE + " - ") + (ChatColor.GOLD + "{" + bountySign.getX() + "," + bountySign.getY()
+							+ "," + bountySign.getZ() + "}")));
 		}
 
+		long bountySignsFound = bountySigns != null ? bountySigns.parallelStream().count() : 0;
 		player.sendMessage(ChatColor.AQUA + "Bounties found: " + bountySignsFound);
 	}
 
@@ -167,13 +169,14 @@ public class BountySignsCommand implements CommandExecutor {
 	}
 
 	private void endBountyById(Player player, String id) {
-
+		
 		BountySign bountySign = plugin.getBountySignRepo().getMap().remove(id);
 
 		if (bountySign == null) {
 			player.sendMessage("No Bounty with id '" + id + "' was found.");
 			return;
-
+		}else{
+			plugin.debugInfo("removing bounty : " + bountySign.getId());
 		}
 
 		plugin.updateBountySignRepo();
@@ -223,49 +226,14 @@ public class BountySignsCommand implements CommandExecutor {
 			player.sendMessage(ChatColor.RED + "You must supply a target entity name.");
 			return;
 		}
-
-		Map<String, BountySign> allSignsMap = plugin.getBountySignRepo().getMap();
-
-		if (allSignsMap == null || allSignsMap.isEmpty()) {
-			player.sendMessage(ChatColor.RED + "There are no signs to remove.");
-			return;
-		}
-
-		int signsRemoved = 0;
-
-		List<String> idsToRemove = new ArrayList<String>();
-		for (String id : allSignsMap.keySet()) {
-			BountySign bountySign = allSignsMap.get(id);
-
-			if (bountySign == null) {
-				plugin.debugInfo("bounty was null.  Can't remove: " + id);
-				continue;
-			}
-
-			if (bountySign.getTarget().equals(args[1])) {
-				idsToRemove.add(id);
-			}
-		}
-
-		if (!idsToRemove.isEmpty()) {
-			for (String id : idsToRemove) {
-				plugin.debugInfo("removing bounty : " + id);
-				endBountyById(player, id);
-				signsRemoved++;
-				plugin.debugInfo("Skipping bounty: " + id);
-			}
-		}
-
-		if (signsRemoved == 0) {
-			player.sendMessage(ChatColor.RED + "There are no signs for that target to remove.");
-		} else {
-			player.sendMessage(ChatColor.YELLOW
-					+ ((signsRemoved + "") + ChatColor.RED + " bounties cleared for target '" + args[1] + "'."));
-		}
-
+		endAllBountiesOptionalTarget(player, args[1]);
 	}
 
 	private void endAllBounties(Player player) {
+		endAllBountiesOptionalTarget(player, null);
+	}
+	
+	private void endAllBountiesOptionalTarget(Player player, String target) {
 
 		Map<String, BountySign> allSignsMap = plugin.getBountySignRepo().getMap();
 
@@ -274,33 +242,32 @@ public class BountySignsCommand implements CommandExecutor {
 			return;
 		}
 
-		int signsRemoved = 0;
+		
+		List<BountySign> bountySignsToRemove = allSignsMap.values().parallelStream()
+				.filter(bountySign -> bountySign != null && (target == null || bountySign.getTarget().equals(target)))
+				.collect(Collectors.toList());
 
-		List<String> idsToRemove = new ArrayList<String>();
-		for (String id : allSignsMap.keySet()) {
-			BountySign bountySign = allSignsMap.get(id);
-
-			if (bountySign == null) {
-				plugin.debugInfo("bounty was null.  Can't remove: " + id);
-				continue;
-			}
-
-			idsToRemove.add(id);
+		if (bountySignsToRemove != null && !bountySignsToRemove.isEmpty()) {
+			bountySignsToRemove.forEach(bountySign -> endBountyById(player, bountySign.getId()));
 		}
-
-		if (!idsToRemove.isEmpty()) {
-			for (String id : idsToRemove) {
-				plugin.debugInfo("removing bounty : " + id);
-				endBountyById(player, id);
-				signsRemoved++;
-				plugin.debugInfo("Skipping bounty: " + id);
-			}
-		}
+		
+		long signsRemoved = bountySignsToRemove != null ? bountySignsToRemove.parallelStream().count() : 0;
 
 		if (signsRemoved == 0) {
-			player.sendMessage(ChatColor.RED + "There are no signs to remove.");
+			if(target == null){
+				player.sendMessage(ChatColor.RED + "There are no signs to remove.");
+			}else{
+				player.sendMessage(ChatColor.RED + "There are no signs for that target to remove.");
+			}
+			
 		} else {
-			player.sendMessage(ChatColor.RED + (signsRemoved + " bounties cleared."));
+			if(target == null){
+				player.sendMessage(ChatColor.RED + (signsRemoved + " bounties cleared."));
+			}else{
+				player.sendMessage(ChatColor.YELLOW
+						+ ((signsRemoved + "") + ChatColor.RED + " bounties cleared for target '" + target + "'."));
+			}
+			
 		}
 	}
 
@@ -347,7 +314,7 @@ public class BountySignsCommand implements CommandExecutor {
 		}
 	}
 
-	private void setBountyCreationTarget(Player player, String[] args) {
+	private void setBountyCreationTarget(Player player, String[] args, boolean killTarget) {
 
 		String targetName = null;
 
@@ -375,6 +342,7 @@ public class BountySignsCommand implements CommandExecutor {
 			return;
 		}
 
+		plugin.setKillTarget(killTarget);
 		plugin.getPlayerLastBountyTargetCreatedMap().put(player.getName(), targetName);
 		player.sendMessage(ChatColor.GREEN + "Bounty creation target set: " + targetName);
 
@@ -385,15 +353,17 @@ public class BountySignsCommand implements CommandExecutor {
 	}
 
 	private void showUsage(Player player, String label) {
-
 		player.sendMessage(ChatColor.GREEN + "Commands: ");
-
-		for (String arg : COMMAND_ARG_MAP.keySet()) {
-			player.sendMessage((ChatColor.DARK_PURPLE + "  /" + label + " " + arg)
-					+ (ChatColor.GREEN + " (" + COMMAND_ARG_MAP.get(arg) + "}"));
-			player.sendMessage(ChatColor.YELLOW + "    "
-					+ (new MessageFormat(COMMAND_ARG_MAP_EXAMPLES.get(arg)).format(new Object[] { label, arg })));
-		}
+		
+		COMMAND_ARG_MAP.keySet().parallelStream().forEach(arg -> 
+			sendCommandArgMessage(arg, player, label));
+	}
+	
+	private void sendCommandArgMessage(String arg, Player player, String label){
+		player.sendMessage((ChatColor.DARK_PURPLE + "  /" + label + " " + arg)
+				+ (ChatColor.GREEN + " (" + COMMAND_ARG_MAP.get(arg) + "}"));
+		player.sendMessage(ChatColor.YELLOW + "    "
+				+ (new MessageFormat(COMMAND_ARG_MAP_EXAMPLES.get(arg)).format(new Object[] { label, arg })));
 	}
 
 }

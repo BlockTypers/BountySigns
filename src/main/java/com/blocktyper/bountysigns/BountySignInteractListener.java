@@ -1,5 +1,6 @@
 package com.blocktyper.bountysigns;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -112,33 +113,40 @@ public class BountySignInteractListener extends AbstractListener{
 		acceptedBounty.setTarget(bountySign.getTarget());
 		bountySignsPlugin.addAcceptedBounty(acceptedBounty);
 
-		ItemStack reward = bountySign.getReward().unbox();
-		player.sendMessage((ChatColor.GREEN + "Mission accepted. Find '") + (ChatColor.RED + bountySign.getTarget()) + ChatColor.GREEN + "'.");
-
 		if (bountySign.getReward() != null) {
+			ItemStack reward = bountySign.getReward().unbox();
+			sendPlayerRewardMessage(reward, player, bountySign.getTarget());
+		}
+
+	}
+	
+	private void sendPlayerRewardMessage(ItemStack reward, Player player, String target){
+		if (reward != null) {
+			
+			player.sendMessage((ChatColor.GREEN + "Mission accepted. Find '") + (ChatColor.RED + target) + ChatColor.GREEN + "'.");
+			
 			player.sendMessage(
-					ChatColor.YELLOW + "You will be rewarded: " + (ChatColor.GREEN + bountySignsPlugin.getRewardDescription(bountySign.getReward().unbox())));
+					ChatColor.YELLOW + "You will be rewarded: " + (ChatColor.GREEN + bountySignsPlugin.getRewardDescription(reward)));
 
 			if (reward.getItemMeta() != null && reward.getItemMeta().getEnchants() != null
 					&& !reward.getItemMeta().getEnchants().isEmpty()) {
 				player.sendMessage(ChatColor.GREEN + " Enchanments: ");
-				for (Enchantment enchantment : reward.getItemMeta().getEnchants().keySet()) {
-					player.sendMessage(ChatColor.GOLD + "  -" + enchantment.getName() + "["
-							+ reward.getItemMeta().getEnchants().get(enchantment) + "]");
-				}
+				reward.getItemMeta().getEnchants().keySet().forEach(enchantment -> sendPlayerEnchantMessage(enchantment, reward, player) );
 			}
 
 			if (reward.getItemMeta() != null && reward.getItemMeta().getLore() != null
 					&& !reward.getItemMeta().getLore().isEmpty()) {
 				player.sendMessage(ChatColor.GREEN + " Lore: ");
-				for (String lore : reward.getItemMeta().getLore()) {
-					player.sendMessage(ChatColor.BLUE + "  -" + lore);
-				}
+				reward.getItemMeta().getLore().forEach(lore -> player.sendMessage(ChatColor.BLUE + "  -" + lore) );
 			}
 		}
-
 	}
 	
+	private void sendPlayerEnchantMessage(Enchantment enchantment, ItemStack item, Player player){
+		String formatOfMessage = "  -{0}[{1}]";
+		String message = new MessageFormat(formatOfMessage).format(new Object[]{enchantment.getName(), item.getItemMeta().getEnchants().get(enchantment)});
+		player.sendMessage(ChatColor.GOLD + "  -" + message);
+	}
 	
 	
 	private BountySign getBountySign(Sign sign) {
@@ -192,7 +200,7 @@ public class BountySignInteractListener extends AbstractListener{
 		ItemStack reward = bountySignsPlugin.getPlayerLastBountyRewardCreatedMap().get(player.getName());
 		String targetName = bountySignsPlugin.getPlayerLastBountyTargetCreatedMap().get(player.getName());
 
-		sign.setLine(0, ChatColor.RED + "Wanted");
+		sign.setLine(0, ChatColor.RED + (bountySignsPlugin.isKillTarget() ? "Kill" : "Wanted"));
 		sign.setLine(1, ChatColor.RED + targetName);
 		sign.setLine(2, ChatColor.DARK_GREEN + "Reward");
 		if (sign.update()) {
@@ -201,6 +209,7 @@ public class BountySignInteractListener extends AbstractListener{
 			bountySign.setY(sign.getY());
 			bountySign.setZ(sign.getZ());
 			bountySign.setTarget(targetName);
+			bountySign.setKillTarget(bountySignsPlugin.isKillTarget());
 
 			bountySign.setReward(new CardboardBox(reward));
 
