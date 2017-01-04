@@ -16,4 +16,12 @@ public class CardboardEnchantment  implements Serializable {
 	public Enchantment unbox() {
         return Enchantment.getByName(name);
     }
+	
+	public String getName() {
+        return name;
+    }
+	
+	public static CardboardEnchantment fromName(String name){
+		return new CardboardEnchantment(Enchantment.getByName(name));
+	}
 }

@@ -139,7 +139,7 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 	}
 
 	public void updateAcceptedBountyRepo() {
-		setData(DATA_KEY_ACCEPTED_BOUNTIES, acceptedBountyRepo);
+		setData(DATA_KEY_ACCEPTED_BOUNTIES, acceptedBountyRepo, true);
 	}
 
 	public List<AcceptedBounty> getAcceptedBounties(String target) {
@@ -186,7 +186,7 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 	}
 
 	public void updateBountySignRepo() {
-		setData(DATA_KEY_BOUNTY_SIGNS, bountySignRepo);
+		setData(DATA_KEY_BOUNTY_SIGNS, bountySignRepo, true);
 	}
 
 	public void initDimentionItemCount() {
