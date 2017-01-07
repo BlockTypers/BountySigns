@@ -1,5 +1,7 @@
 package com.blocktyper.bountysigns.data;
 
+import com.blocktyper.serialization.CardboardBox;
+
 public class BountySign {
 	private String id;
 	private String world;

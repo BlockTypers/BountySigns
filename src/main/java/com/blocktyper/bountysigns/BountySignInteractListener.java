@@ -20,8 +20,8 @@ import org.bukkit.inventory.ItemStack;
 
 import com.blocktyper.bountysigns.data.AcceptedBounty;
 import com.blocktyper.bountysigns.data.BountySign;
-import com.blocktyper.bountysigns.data.CardboardBox;
 import com.blocktyper.plugin.IBlockTyperPlugin;
+import com.blocktyper.serialization.CardboardBox;
 
 import listeners.AbstractListener;
 

@@ -2,6 +2,8 @@ package com.blocktyper.bountysigns.data;
 
 import java.util.Date;
 
+import com.blocktyper.serialization.CardboardBox;
+
 public class AcceptedBounty {
 	private String player;
 	private String target;

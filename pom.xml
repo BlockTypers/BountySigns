@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.blocktyper</groupId>
 	<artifactId>bountysigns</artifactId>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<name>BountySigns</name>
 	
 	<properties>
@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>com.blocktyper</groupId>
 			<artifactId>blocktyperplugin</artifactId>
-			<version>1.0.6</version>
+			<version>1.1.2</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
@@ -52,7 +52,7 @@
 	<build>
 		<resources>
 			<resource>
-				<targetPath>com/blocktyper/magicdoors/resources</targetPath>
+				<targetPath>com/blocktyper/bountysigns/resources</targetPath>
 				<filtering>false</filtering>
 				<directory>${basedir}/src/main/resources</directory>
 				<includes>

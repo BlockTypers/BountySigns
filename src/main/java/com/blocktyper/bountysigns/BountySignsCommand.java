@@ -299,9 +299,8 @@ public class BountySignsCommand implements CommandExecutor {
 			return;
 		}
 
-		ItemStack reward = new ItemStack(itemInHand.getType());
+		ItemStack reward = itemInHand.clone();
 		reward.setAmount(amount);
-		reward.setItemMeta(itemInHand.getItemMeta());
 
 		plugin.getPlayerLastBountyRewardCreatedMap().put(player.getName(), reward);
 

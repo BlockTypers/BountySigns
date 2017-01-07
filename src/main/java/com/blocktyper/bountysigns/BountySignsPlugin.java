@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -42,12 +43,9 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 	}
 
 	// begin localization
-	private ResourceBundle bundle = null;
-
-	public ResourceBundle getBundle() {
-		if (bundle == null)
-			bundle = ResourceBundle.getBundle(RESOURCE_NAME, locale);
-		return bundle;
+	@Override
+	public ResourceBundle getBundle(Locale locale) {
+		return ResourceBundle.getBundle(RESOURCE_NAME, locale);
 	}
 	// end localization
 
@@ -149,8 +147,8 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 
 	public AcceptedBounty getAcceptedBounty(List<AcceptedBounty> acceptedBounties, String playerName,
 			String bountySignId) {
-		Optional<AcceptedBounty> first = acceptedBounties != null ? acceptedBounties.parallelStream()
-				.filter(existing -> !existing.getPlayer().equals(playerName) && !existing.getBountySignId().equals(bountySignId))
+		Optional<AcceptedBounty> first = acceptedBounties != null ? acceptedBounties.stream()
+				.filter(existing -> existing.getPlayer().equals(playerName) && existing.getBountySignId().equals(bountySignId))
 				.findFirst() : null;
 		return first != null && first.isPresent() ? first.get() : null;
 	}
