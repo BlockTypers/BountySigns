@@ -10,16 +10,19 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import com.blocktyper.v1_2_5.BlockTyperBasePlugin;
+import com.blocktyper.v1_2_5.helpers.DimentionItemCount;
+import com.blocktyper.v1_2_5.recipes.IRecipe;
 import org.bukkit.inventory.ItemStack;
 
 import com.blocktyper.bountysigns.data.AcceptedBounty;
 import com.blocktyper.bountysigns.data.AcceptedBountyRepo;
 import com.blocktyper.bountysigns.data.BountySign;
 import com.blocktyper.bountysigns.data.BountySignRepo;
-import com.blocktyper.helpers.DimentionItemCount;
-import com.blocktyper.plugin.BlockTyperPlugin;
 
-public class BountySignsPlugin extends BlockTyperPlugin {
+public class BountySignsPlugin extends BlockTyperBasePlugin {
+
+    private static final String RECIPES_KEY = "BOUNTY_SIGNS_RECIPE_KEY";
 
 	public static final String RESOURCE_NAME = "com.blocktyper.bountysigns.resources.BountySignsMessages";
 
@@ -252,4 +255,14 @@ public class BountySignsPlugin extends BlockTyperPlugin {
 				+ " [" + itemStack.getAmount() + "]";
 		return desc;
 	}
+
+	@Override
+	public IRecipe bootstrapRecipe(IRecipe recipe) {
+		return recipe;
+	}
+
+    @Override
+    public String getRecipesNbtKey() {
+        return RECIPES_KEY;
+    }
 }

@@ -1,10 +1,7 @@
 package com.blocktyper.bountysigns;
 
 import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.bukkit.ChatColor;
@@ -21,6 +18,8 @@ import org.bukkit.inventory.ItemStack;
 import com.blocktyper.bountysigns.data.BountySign;
 
 public class BountySignsCommand implements CommandExecutor {
+
+	public static final List<String> PERMISSIONS = Arrays.asList("bountysigns.add.new.bounty.sign");
 
 	private static String COMMAND_BOUNTY_SIGNS = "bounty-signs";
 	private static String COMMAND_BOUNTY_SIGNS_SHORT = "bnty";
@@ -90,8 +89,8 @@ public class BountySignsCommand implements CommandExecutor {
 
 			Player player = (Player) sender;
 
-			if (!plugin.getPlayerHelper().playerCanDoAction(player, BountySignsPlugin.PERMISSIONS)) {
-				player.sendMessage(ChatColor.RED + "You do not have persmission to execute this command");
+			if (!plugin.getPlayerHelper().playerCanDoAction(player, PERMISSIONS)) {
+				player.sendMessage(ChatColor.RED + "You do not have permission to execute this command");
 				return false;
 			}
 
