@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import com.blocktyper.v1_2_5.serialization.CardboardBox;
+import com.blocktyper.v1_2_6.serialization.CardboardBox;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;

@@ -1,6 +1,6 @@
 package com.blocktyper.bountysigns.data;
 
-import com.blocktyper.v1_2_5.serialization.CardboardBox;
+import com.blocktyper.v1_2_6.serialization.CardboardBox;
 
 import java.util.Date;
 

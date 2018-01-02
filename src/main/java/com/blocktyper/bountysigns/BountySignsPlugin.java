@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import com.blocktyper.v1_2_5.BlockTyperBasePlugin;
-import com.blocktyper.v1_2_5.helpers.DimentionItemCount;
-import com.blocktyper.v1_2_5.recipes.IRecipe;
+import com.blocktyper.v1_2_6.BlockTyperBasePlugin;
+import com.blocktyper.v1_2_6.helpers.DimentionItemCount;
+import com.blocktyper.v1_2_6.recipes.IRecipe;
 import org.bukkit.inventory.ItemStack;
 
 import com.blocktyper.bountysigns.data.AcceptedBounty;
